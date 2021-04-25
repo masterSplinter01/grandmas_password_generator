@@ -42,7 +42,7 @@ void WordsAndCostsTable::create_table(std::ifstream &file) {
 uint64_t WordsAndCostsTable::calculate_word_cost(const std::string &str) {
   if (str.length() == 1)
     return 0;
-  int cost = 0;
+  uint64_t cost = 0;
   for (size_t i = 1; i < str.length(); ++i) {
     cost += calculate_distance(str[i - 1], str[i]);
   }

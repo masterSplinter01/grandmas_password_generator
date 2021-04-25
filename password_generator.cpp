@@ -3,6 +3,10 @@
 #include <algorithm>
 #include <climits>
 
+/* here we use dynamic programming, dp is a 3-dimensional array which cells keep minimum costs.
+ * dp[n][c][l] keeps min cost of a password that contains n words, ends with char c and has
+ * length l
+ */
 std::string generate_password(const WordsAndCostsTable &words_costs) {
   uint64_t dp[consts::number_of_words + 1][consts::alphabet_size][consts::length_max + 1];
 
@@ -10,11 +14,11 @@ std::string generate_password(const WordsAndCostsTable &words_costs) {
               (consts::number_of_words + 1) * consts::alphabet_size * (consts::length_max + 1),
               UINT_MAX);
 
-  // last_char means last char of a word
+  // init with costs of empty passwords
   for (size_t last_char = 0; last_char < consts::alphabet_size; ++last_char) {
     dp[0][last_char][0] = 0;
   }
-
+  // calculating dp
   for (size_t n = 0; n < consts::number_of_words; ++n) {
     for (size_t last_char = 0; last_char < consts::alphabet_size; ++last_char) {
       for (size_t length = 0; length < consts::length_max; ++length) {
@@ -32,7 +36,7 @@ std::string generate_password(const WordsAndCostsTable &words_costs) {
       }
     }
   }
-
+  // finding a cell with min cost
   uint64_t dp_min_last_char = 0;
   uint64_t dp_min_length = 0;
   uint64_t dp_min = UINT_MAX;
@@ -45,9 +49,12 @@ std::string generate_password(const WordsAndCostsTable &words_costs) {
       }
     }
   }
-
+  // restoring the password using backtracking
   std::string password;
+  // we need this vector because we restore the password from the last word to the first
   std::vector<std::string> password_tmp;
+  // i know that these variables may be extra but i created them to make code more comfortable to
+  // read
   uint64_t length_remain = dp_min_length;
   uint64_t n_remain = consts::number_of_words;
   uint64_t current_last_char = dp_min_last_char;
