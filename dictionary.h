@@ -1,6 +1,6 @@
 #pragma once
 
 #include <fstream>
-#include <unordered_map>
+#include <vector>
 
-std::unordered_map<std::string, int> generate_dictionary();
+std::vector<std::pair<std::string, int>> generate_dictionary(const std::string& words_filepath = "");
