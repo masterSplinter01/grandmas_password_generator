@@ -37,6 +37,6 @@ https://en.wikipedia.org/wiki/Words_(Unix)
    ./grandmas_password_generator path/to/words/file
    ```
 
-Your custom dictionary must contain one word per line. The folder 'examples' contains example dictionaries. 
+Your custom dictionary must contain one word per line. And must not contain '\r', '\n' '\t' etc. symbols, because lines containing these symbols will be skipped. And must contains at least 4 words. 
 
-File *words_alpha.txt* was taken [this repository](https://github.com/dwyl/english-words) (maybe i should include this like a submodule but i decided to take the easy way :) )
+The folder 'examples' contains example dictionaries. File *words_alpha.txt* was taken [this repository](https://github.com/dwyl/english-words) (maybe i should include this like a submodule but i decided to take the easy way :) )
