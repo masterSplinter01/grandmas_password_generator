@@ -10,7 +10,7 @@ WordsAndCostsTable::WordsAndCostsTable(const std::string &filepath) {
   if (!filepath.empty()) {
     file.open(filepath);
   } else {
-    std::vector<std::string> words_file_paths = {"/usr/share/dict/words", "/usr/dict/words"};
+    std::vector<std::string> words_file_paths = {"/usr/share/dict/words", "/usr/dict/words", "/usr/share/dict/american-english"};
     for (const auto &path : words_file_paths) {
       file.open(path);
       if (file.is_open())
