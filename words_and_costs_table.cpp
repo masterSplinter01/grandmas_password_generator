@@ -20,7 +20,7 @@ WordsAndCostsTable::WordsAndCostsTable(const std::string &filepath) {
 
   if (file.fail()) {
     throw std::runtime_error(
-        "Couldn't open the file with dictionary. Please check if the package words is installed.");
+        "Couldn't open the file with words list.");
   }
 
   create_table(file);
