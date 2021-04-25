@@ -53,16 +53,17 @@ std::string generate_password(const WordsAndCostsTable &words_costs) {
   uint64_t current_last_char = dp_min_last_char;
   uint64_t cost_remain = dp_min;
   while (n_remain != 0) {
-    for (const auto  &[word, cost] : words_costs.get_items()) {
+    for (const auto &[word, cost] : words_costs.get_items()) {
       if (char(current_last_char + 'a') != word.back() || length_remain < word.length())
         continue;
 
       bool found = false;
       for (size_t last_char = 0; last_char < consts::alphabet_size && !found; ++last_char) {
-        const auto possible_prev_word_cost = dp[n_remain - 1][last_char][length_remain - word.length()];
+        const auto possible_prev_word_cost =
+            dp[n_remain - 1][last_char][length_remain - word.length()];
         if (possible_prev_word_cost != UINT_MAX &&
-            cost_remain ==
-                possible_prev_word_cost + cost + calculate_distance(last_char + 'a', word.front())) {
+            cost_remain == possible_prev_word_cost + cost +
+                               calculate_distance(last_char + 'a', word.front())) {
           found = true;
           cost_remain -= cost + calculate_distance(last_char + 'a', word.front());
           current_last_char = last_char;
@@ -75,7 +76,7 @@ std::string generate_password(const WordsAndCostsTable &words_costs) {
     }
     n_remain--;
   }
-  for (auto it = password_tmp.crbegin(); it != password_tmp.crend(); ++it) 
-  password += *it;
+  for (auto it = password_tmp.crbegin(); it != password_tmp.crend(); ++it)
+    password += *it;
   return password;
 }
