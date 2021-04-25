@@ -15,6 +15,11 @@ int main(int argc, char **argv) {
     print_help();
     exit(1);
   }
-  std::cout << generate_password(WordsAndCostsTable(filepath)) << std::endl;
+  try {
+    std::cout << generate_password(WordsAndCostsTable(filepath)) << std::endl;
+  } catch (std::exception &e) {
+    std::cerr << e.what() << std::endl;
+    exit(1);
+  }
   return 0;
 }

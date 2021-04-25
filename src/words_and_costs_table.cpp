@@ -1,6 +1,7 @@
 #include "words_and_costs_table.h"
 
 #include <algorithm>
+#include <cctype>
 #include <fstream>
 
 #include "distance.h"
@@ -10,7 +11,8 @@ WordsAndCostsTable::WordsAndCostsTable(const std::string &filepath) {
   if (!filepath.empty()) {
     file.open(filepath);
   } else {
-    std::vector<std::string> words_file_paths = {"/usr/share/dict/words", "/usr/dict/words", "/usr/share/dict/american-english"};
+    std::vector<std::string> words_file_paths = {"/usr/share/dict/words", "/usr/dict/words",
+                                                 "/usr/share/dict/american-english"};
     for (const auto &path : words_file_paths) {
       file.open(path);
       if (file.is_open())
@@ -19,17 +21,23 @@ WordsAndCostsTable::WordsAndCostsTable(const std::string &filepath) {
   }
 
   if (file.fail()) {
-    throw std::runtime_error(
-        "Couldn't open the file with words list.");
+    throw std::runtime_error("Couldn't open the file with words list.");
   }
 
   create_table(file);
 }
 
 void WordsAndCostsTable::create_table(std::ifstream &file) {
+  auto contains_only_letters = [](const std::string &word) {
+    for (const auto c : word) {
+      if (!std::isalpha(c))
+        return false;
+    }
+    return true;
+  };
   for (std::string line; getline(file, line);) {
     std::transform(line.begin(), line.end(), line.begin(), [](char c) { return std::tolower(c); });
-    if (line.find("'") != std::string::npos) {
+    if (!contains_only_letters(line)) {
       continue;
     }
     table.emplace_back(line, calculate_word_cost(line));
@@ -37,6 +45,9 @@ void WordsAndCostsTable::create_table(std::ifstream &file) {
 
   std::sort(table.begin(), table.end());
   std::unique(table.begin(), table.end());
+  if (table.size() < 4) {
+    throw std::logic_error("Not enough valid words in the dictionary.");
+  }
 }
 
 uint64_t WordsAndCostsTable::calculate_word_cost(const std::string &str) {
