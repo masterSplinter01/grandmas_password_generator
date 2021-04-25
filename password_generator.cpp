@@ -1,14 +1,14 @@
 #include "password_generator.h"
 
 #include <algorithm>
+#include <climits>
 
-std::string generate_password() {
-  auto words_costs = generate_dictionary();
-  size_t dp[consts::number_of_words + 1][consts::alphabet_size][consts::length_max + 1];
+std::string generate_password(const WordsAndCostsTable &words_costs) {
+  uint64_t dp[consts::number_of_words + 1][consts::alphabet_size][consts::length_max + 1];
 
-  std::fill_n((size_t *)dp,
+  std::fill_n((uint64_t *)dp,
               (consts::number_of_words + 1) * consts::alphabet_size * (consts::length_max + 1),
-              consts::inf);
+              UINT_MAX);
 
   // last_char means last char of a word
   for (size_t last_char = 0; last_char < consts::alphabet_size; ++last_char) {
@@ -18,23 +18,24 @@ std::string generate_password() {
   for (size_t n = 0; n < consts::number_of_words; ++n) {
     for (size_t last_char = 0; last_char < consts::alphabet_size; ++last_char) {
       for (size_t length = 0; length < consts::length_max; ++length) {
-        if (dp[n][last_char][length] == consts::inf)
+        if (dp[n][last_char][length] == UINT_MAX)
           continue;
 
-        for (auto const &[word, cost] : words_costs) {
+        for (auto const &[word, cost] : words_costs.get_items()) {
           if (length + word.length() <= consts::length_max) {
-            dp[n + 1][word.back() - 'a'][length + word.length()] = std::min(
-                dp[n + 1][word.back() - 'a'][length + word.length()],
-                dp[n][last_char][length] + cost + get_distance(last_char + 'a', word.front()));
+            dp[n + 1][word.back() - 'a'][length + word.length()] =
+                std::min(dp[n + 1][word.back() - 'a'][length + word.length()],
+                         dp[n][last_char][length] + cost +
+                             calculate_distance(last_char + 'a', word.front()));
           }
         }
       }
     }
   }
 
-  size_t dp_min_last_char = 0;
-  size_t dp_min_length = 0;
-  size_t dp_min = consts::inf;
+  uint64_t dp_min_last_char = 0;
+  uint64_t dp_min_length = 0;
+  uint64_t dp_min = UINT_MAX;
   for (size_t last_char = 0; last_char < consts::alphabet_size; ++last_char) {
     for (size_t length = consts::length_min; length <= consts::length_max; ++length) {
       if (const auto cost = dp[consts::number_of_words][last_char][length]; cost < dp_min) {
@@ -44,26 +45,29 @@ std::string generate_password() {
       }
     }
   }
+
   std::string password;
-  size_t length_remain = dp_min_length;
-  size_t n_remain = consts::number_of_words;
-  size_t current_last_char = dp_min_last_char;
-  size_t cost_remain = dp_min;
+  std::vector<std::string> password_tmp;
+  uint64_t length_remain = dp_min_length;
+  uint64_t n_remain = consts::number_of_words;
+  uint64_t current_last_char = dp_min_last_char;
+  uint64_t cost_remain = dp_min;
   while (n_remain != 0) {
-    for (auto const &[word, cost] : words_costs) {
-      if (char('a' + current_last_char) != word.back() || length_remain < word.length())
+    for (const auto  &[word, cost] : words_costs.get_items()) {
+      if (char(current_last_char + 'a') != word.back() || length_remain < word.length())
         continue;
 
       bool found = false;
       for (size_t last_char = 0; last_char < consts::alphabet_size && !found; ++last_char) {
-        const auto maybe_prev_cost = dp[n_remain - 1][last_char][length_remain - word.length()];
-        if (maybe_prev_cost != consts::inf &&
-            cost_remain == maybe_prev_cost + cost + get_distance(last_char + 'a', word.front())) {
+        const auto possible_prev_word_cost = dp[n_remain - 1][last_char][length_remain - word.length()];
+        if (possible_prev_word_cost != UINT_MAX &&
+            cost_remain ==
+                possible_prev_word_cost + cost + calculate_distance(last_char + 'a', word.front())) {
           found = true;
-          cost_remain -= cost + get_distance(last_char + 'a', word.front());
+          cost_remain -= cost + calculate_distance(last_char + 'a', word.front());
           current_last_char = last_char;
           length_remain -= word.length();
-          std::copy(word.rbegin(), word.rend(), std::back_inserter(password));
+          password_tmp.push_back(word);
         }
       }
       if (found)
@@ -71,6 +75,7 @@ std::string generate_password() {
     }
     n_remain--;
   }
-  std::reverse(password.begin(), password.end());
+  for (auto it = password_tmp.crbegin(); it != password_tmp.crend(); ++it) 
+  password += *it;
   return password;
 }

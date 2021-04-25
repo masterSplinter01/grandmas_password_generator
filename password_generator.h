@@ -1,15 +1,13 @@
 #pragma once
 #include <vector>
 
-#include "dictionary.h"
+#include "words_and_costs_table.h"
 #include "distance.h"
 
 namespace consts {
-    constexpr size_t number_of_words = 4;
-    constexpr size_t alphabet_size = 26;
-    constexpr size_t length_max = 24;
-    constexpr size_t length_min = 20;
-    constexpr size_t inf = -1;
-}
- std::string generate_password();
+constexpr uint64_t number_of_words = 4;
+constexpr uint64_t length_max = 24;
+constexpr uint64_t length_min = 20;
+} // namespace consts
 
+std::string generate_password(const WordsAndCostsTable &words_costs);
